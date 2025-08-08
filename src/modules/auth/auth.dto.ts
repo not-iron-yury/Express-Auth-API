@@ -1,12 +1,19 @@
-import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import { IsEmail, IsString, MinLength } from "class-validator";
 
 export class RegisterDto {
-  @IsNotEmpty()
-  @IsString()
   @IsEmail({}, { message: "Не корректный email" })
   email!: string;
 
-  @IsNotEmpty()
   @IsString()
+  @MinLength(6, { message: "Пароль должен быть минимум из 6 символов" })
+  password!: string;
+}
+
+export class LoginDto {
+  @IsEmail({}, { message: "Не корректный email" })
+  email!: string;
+
+  @IsString()
+  @MinLength(6)
   password!: string;
 }

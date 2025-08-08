@@ -9,4 +9,6 @@ router.post("/register", controller.register.bind(controller));
 // Привязка методом .bind(controller) гарантирует, что внутри метода register значение this всегда будет указывать
 // именно на экземпляр контроллера (controller), позволяя корректно обращаться к его внутренним данным и методам.
 
+router.post("/login", controller.login.bind(controller));
+
 export default router;
