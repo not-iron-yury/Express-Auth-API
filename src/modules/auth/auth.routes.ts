@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { authGuard } from "../common/guards/auth.guard";
 import { AuthController } from "./auth.controller";
 
 const router = Router();
@@ -10,5 +11,9 @@ router.post("/register", controller.register.bind(controller));
 // именно на экземпляр контроллера (controller), позволяя корректно обращаться к его внутренним данным и методам.
 
 router.post("/login", controller.login.bind(controller));
+
+router.get("/me", authGuard, (req, res) => {
+  res.json({ user: req.user });
+});
 
 export default router;
