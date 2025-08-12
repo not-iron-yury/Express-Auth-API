@@ -8,8 +8,25 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
+  id           Int            @id @default(autoincrement())
+  email        String         @unique
+  password     String
+  createdAt    DateTime       @default(now())
+  RefreshToken RefreshToken[]
+}
+
+model RefreshToken {
+  id              Int      @id @default(autoincrement())
+  token           String // hash refresh токена, НЕ сырой токен
+  user            User     @relation(fields: [userId], references: [id]) // связь с таблицей User
+  userId          Int // id владельца токена
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime // конечная точка действия токена
+  revoked         Boolean // флаг, показывающий статус отзыва (отмены) токена
+  replacedByToken String? // опционально: для rotation: хранить ссылку на токен-заменитель
+  createdByIp     String? // опционально: IP устройства/клиента
+  deviceInfo      String? // опционально: user-agent или дескриптор устройства
+
+  @@index([userId]) // указывает на создание индекса по полю userId, что ускоряет выборку всех токенов конкретного пользователя
+  @@map("refresh_tokens") // название физической таблицы
 }
