@@ -17,7 +17,7 @@ model User {
 
 model RefreshToken {
   id              Int      @id @default(autoincrement())
-  token           String // hash refresh токена, НЕ сырой токен
+  token           String   @unique // hash refresh токена, НЕ сырой токен
   user            User     @relation(fields: [userId], references: [id]) // связь с таблицей User
   userId          Int // id владельца токена
   createdAt       DateTime @default(now())
