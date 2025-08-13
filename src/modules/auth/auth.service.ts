@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import config from "../../config";
 import { type payloadType } from "../../types/payload.type";
 import { hmacSha256Hex } from "../../utils/crypto";
 import { BadRequestException } from "../common/errors/BadRequestException";
@@ -8,8 +9,8 @@ import { InvalidDurationError } from "../common/errors/InvalidDurationError";
 import { UnauthorizedException } from "../common/errors/UnauthorizedException";
 import prisma from "../prisma/client";
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET as string;
+const JWT_SECRET = config.jwtSecret;
+const REFRESH_TOKEN_SECRET = config.refreshTokenSecret;
 const JWT_EXPIRES_IN = "1h";
 const REFRESH_TOKEN_EXPIRES_IN = "7d";
 
