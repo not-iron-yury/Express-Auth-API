@@ -145,10 +145,14 @@ export class AuthService {
 
   // выдает новый accessToken по refreshToken
   async refreshTokens(providedRefreshToken: string) {
+    if (!providedRefreshToken || typeof providedRefreshToken !== "string") {
+      throw new BadRequestException("Refresh token обязателен");
+    }
+
     // 1) верификация предоставленного refreshToken
     let payload: any;
     try {
-      payload = jwt.verify(
+      jwt.verify(
         providedRefreshToken,
         REFRESH_TOKEN_SECRET
       ) as unknown as payloadType;
@@ -197,5 +201,42 @@ export class AuthService {
 
     // 7) возвращаем оба токена
     return tokens;
+  }
+
+  // отзыв refresh token
+  async revokeRefreshToken(providedRefreshToken: string) {
+    if (!providedRefreshToken || typeof providedRefreshToken !== "string") {
+      throw new BadRequestException("Не предоставлен refresh token");
+    }
+
+    // 1) верификация предоставленного refreshToken (в payload нет необходимости, поэтому только проверка)
+    try {
+      jwt.verify(providedRefreshToken, REFRESH_TOKEN_SECRET);
+    } catch (err) {
+      throw new UnauthorizedException("Невалидный refresh token");
+    }
+
+    // 2) находим по хэшу в БД (для проверки нужны значения полей revoked и expiresAt)
+    const tokenHash = hmacSha256Hex(REFRESH_TOKEN_SECRET, providedRefreshToken); // хэшируем предоставленный refreshToken
+    const stored = await prisma.refreshToken.findUnique({
+      where: { token: tokenHash },
+    });
+
+    if (!stored) {
+      throw new UnauthorizedException("Refresh token не найден в БД");
+    }
+
+    // 3) проверка на revoked (что бы не выполнять лишнее обращение к БД)
+    if (stored.revoked) {
+      return; // ничего не делаем, т.к. токен уже отозван
+    }
+
+    // 4) Помечаем токен как revoked
+    await prisma.refreshToken.update({
+      where: { id: stored.id },
+      data: { revoked: true },
+    });
+
+    return true;
   }
 }

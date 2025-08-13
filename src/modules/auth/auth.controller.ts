@@ -39,13 +39,27 @@ export class AuthController {
       const tokens = await authService.refreshTokens(refreshToken);
       return res.status(200).json(tokens);
     } catch (error) {
-      console.error("Ошибка refresh token'а в контроллере:", error);
-      return res
-        .status(401)
-        .json({ message: "Недействительный или просроченный refresh token" });
+      this.handleError(error, res);
     }
   }
 
+  async logout(req: Request, res: Response) {
+    try {
+      const { refreshToken } = req.body;
+      if (!refreshToken) {
+        return res
+          .status(400)
+          .json({ message: "Не предоставлен refresh token" });
+      }
+
+      await authService.revokeRefreshToken(refreshToken);
+      return res.status(200).json({ message: "Logout done" });
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
+  // обработка ошибок
   private handleError(error: any, res: Response) {
     // если кастомное исплючение
     if (error instanceof HttpException) {
